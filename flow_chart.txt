@@ -1,0 +1,27 @@
+<Red>
+1. Client requests "Lost" POST.
+2. Server(Call) calls the call API.
+3. Server(Call) sends call to the Client.
+4. Client give answers to Server(Call).
+5. Server(Call) give the feature to AI2. 
+6. AI2 matches the feature based on DB(GCS)
+7. AI2 returns id & indexs
+
+(if there is index)
+8. Server requests to DB(Firebase) with id to receive personal information.
+(if there is no index)
+8. Server will keep the information and queue when new data from 'found' uploaded.
+
+9. Server requests EMail API.
+10. EMail is sent to Client.
+
+
+<Blue>
+1. Client requests "Found" POST.
+2. Server(call) class the call API.
+3. Server(Call) sends call to the Client.
+4. Client give answers to Server(Call).
+5. Server(Call) stores personal information at DB(Firebase)
+6. Server(Call) gives the image to AI1.
+7. AI1 stores the information feature of given image.
+8. AI1 sends signal to Server that new lost is registered.

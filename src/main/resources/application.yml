@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:wasuremwono}
+  profiles:
+    default: local
+
+server:
+  port: ${SERVER_PORT:8080}
+
+wasuremwono:
+  app:
+    environment: ${APP_ENV:local}
+    base-url: ${APP_BASE_URL:http://localhost:8080}
+
+  gcp:
+    project-id: ${GCP_PROJECT_ID:}
+    region: ${GCP_REGION:asia-northeast3}
+    storage-bucket: ${GCP_STORAGE_BUCKET:}
+
+  firebase:
+    contacts-collection: ${FIREBASE_CONTACTS_COLLECTION:contacts}
+
+  notification:
+    email-preview-only: ${EMAIL_PREVIEW_ONLY:true}
+    sender-name: ${EMAIL_SENDER_NAME:Mono from Wasuremono}
+    sender-email: ${EMAIL_SENDER_EMAIL:no-reply@wasuremwono.local}
+
+  reward:
+    currency: ${REWARD_CURRENCY:KRW}
+    platform-fee-rate: ${PLATFORM_FEE_RATE:0.10}
+
+  matching:
+    provider: ${MATCHING_PROVIDER:mock-rule-based}
+    external-api-url: ${MATCHING_EXTERNAL_API_URL:}
+    external-api-key: ${MATCHING_EXTERNAL_API_KEY:}
+
+  ai:
+    enabled: ${AI_BRIDGE_ENABLED:false}
+    python-executable: ${AI_BRIDGE_PYTHON_EXECUTABLE:ai/.venv/Scripts/python.exe}
+    project-dir: ${AI_BRIDGE_PROJECT_DIR:ai}
+    analyses-prefix: ${AI_BRIDGE_ANALYSES_PREFIX:photo-features/analyses/}
+    upload-prefix: ${AI_BRIDGE_UPLOAD_PREFIX:photo-features}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+wasuremwono:
+  storage:
+    type: memory
+
+---
+spring:
+  config:
+    activate:
+      on-profile: gcp
+
+wasuremwono:
+  storage:
+    type: gcs
+    bucket: ${GCP_STORAGE_BUCKET}
+    prefix: ${GCP_STORAGE_PREFIX:wasuremwono}
