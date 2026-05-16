@@ -36,6 +36,7 @@ def _compact_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
             "number": item["number"],
+            "item_id": item["item_id"],
             "description": item["description"],
         }
         for item in items

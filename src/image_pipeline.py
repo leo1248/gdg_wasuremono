@@ -38,6 +38,7 @@ SUPPORTED_IMAGE_SUFFIXES = {
 
 @dataclass(frozen=True)
 class ImageProcessResult:
+    item_id: str
     local_image_path: str
     image_gcs_uri: str
     summary_gcs_uri: str
@@ -73,17 +74,18 @@ def process_image(image_path: str, gcs_prefix: str = "photo-features") -> ImageP
     summary = summarize_image(str(path))
 
     now = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_id = f"{path.stem}-{now}-{uuid4().hex[:8]}"
+    item_id = f"{path.stem}-{now}-{uuid4().hex[:8]}"
     normalized_prefix = gcs_prefix.strip("/")
 
-    image_blob = f"{normalized_prefix}/images/{run_id}{path.suffix.lower()}"
-    summary_blob = f"{normalized_prefix}/analyses/{run_id}.txt"
-    metadata_blob = f"{normalized_prefix}/analyses/{run_id}.json"
+    image_blob = f"{normalized_prefix}/images/{item_id}{path.suffix.lower()}"
+    summary_blob = f"{normalized_prefix}/analyses/{item_id}.txt"
+    metadata_blob = f"{normalized_prefix}/analyses/{item_id}.json"
 
     image_gcs_uri = upload_file(str(path), image_blob)
     summary_gcs_uri = upload_text(summary, summary_blob)
 
     metadata = {
+        "item_id": item_id,
         "local_image_path": str(path.resolve()),
         "image_gcs_uri": image_gcs_uri,
         "summary_gcs_uri": summary_gcs_uri,
@@ -92,6 +94,7 @@ def process_image(image_path: str, gcs_prefix: str = "photo-features") -> ImageP
     metadata_gcs_uri = upload_json(metadata, metadata_blob)
 
     return ImageProcessResult(
+        item_id=item_id,
         local_image_path=str(path.resolve()),
         image_gcs_uri=image_gcs_uri,
         summary_gcs_uri=summary_gcs_uri,

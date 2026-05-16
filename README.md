@@ -75,6 +75,9 @@ python scripts/process_image.py "C:\path\to\photos" --recursive
 - 특징 요약 텍스트: `gs://<bucket>/photo-features/analyses/...txt`
 - 처리 메타데이터: `gs://<bucket>/photo-features/analyses/...json`
 
+메타데이터 JSON에는 각 사진 분석 항목의 고유 ID인 `item_id`가 포함됩니다.
+`item_id`는 같은 이름의 `.txt` 분석 파일과 연결되는 안정적인 식별자입니다.
+
 GCS 경로 prefix를 바꾸고 싶으면 `--prefix`를 사용하세요.
 
 ```powershell
@@ -100,4 +103,10 @@ gs://<bucket>/photo-features/analyses/*.json
 
 ```powershell
 python scripts/match_text.py "검은색 가죽 여성용 핸드백" --prefix "uploads/session-1/analyses/"
+```
+
+기존 GCS 분석 JSON에 `item_id`를 추가하려면:
+
+```powershell
+python scripts/backfill_gcs_item_ids.py
 ```
