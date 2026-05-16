@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 import json
 from typing import Any
 
@@ -32,6 +33,16 @@ MATCH_PROMPT_TEMPLATE = """
 """.strip()
 
 
+@dataclass(frozen=True)
+class TextMatchResult:
+    matched: bool
+    number: int | None
+    item_id: str | None
+    metadata_blob: str | None
+    image_gcs_uri: str | None
+    summary_gcs_uri: str | None
+
+
 def _compact_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
@@ -47,9 +58,16 @@ def match_text_to_item(
     query: str,
     analyses_prefix: str = DEFAULT_ANALYSES_PREFIX,
 ) -> int | None:
+    return match_text_to_item_detail(query, analyses_prefix).number
+
+
+def match_text_to_item_detail(
+    query: str,
+    analyses_prefix: str = DEFAULT_ANALYSES_PREFIX,
+) -> TextMatchResult:
     items = load_items_from_gcs(analyses_prefix)
     if not items:
-        return None
+        return TextMatchResult(False, None, None, None, None, None)
 
     prompt = MATCH_PROMPT_TEMPLATE.format(
         query=query.strip(),
@@ -68,16 +86,26 @@ def match_text_to_item(
     try:
         parsed = json.loads(raw_text)
     except json.JSONDecodeError:
-        return None
+        return TextMatchResult(False, None, None, None, None, None)
 
     number = parsed.get("number")
     if number is None:
-        return None
+        return TextMatchResult(False, None, None, None, None, None)
 
-    valid_numbers = {int(item["number"]) for item in items}
     try:
         matched_number = int(number)
     except (TypeError, ValueError):
-        return None
+        return TextMatchResult(False, None, None, None, None, None)
 
-    return matched_number if matched_number in valid_numbers else None
+    matched_item = next((item for item in items if int(item["number"]) == matched_number), None)
+    if matched_item is None:
+        return TextMatchResult(False, None, None, None, None, None)
+
+    return TextMatchResult(
+        matched=True,
+        number=matched_number,
+        item_id=matched_item.get("item_id"),
+        metadata_blob=matched_item.get("metadata_blob"),
+        image_gcs_uri=matched_item.get("image_gcs_uri"),
+        summary_gcs_uri=matched_item.get("summary_gcs_uri"),
+    )
