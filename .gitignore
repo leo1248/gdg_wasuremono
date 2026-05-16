@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.idea/
+*.iml
+.env
+.env.*
+!.env.example
+service-account*.json
+gcp-service-account*.json
+credentials*.json
